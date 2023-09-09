@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const entries = [
+let entries = [
     {
         "id": 1,
         "name": "Arto Hellas",
@@ -37,6 +37,13 @@ app.get('/api/persons/:id', (req, res) => {
         res.json(match);
     }
 });
+
+app.delete('/api/persons/:id', (req, res) => {
+    const id = req.params.id;
+    entries = entries.filter(entry => entry.id !== Number(id));
+    console.log(entries);
+    res.status(204).end();
+})
 
 app.get('/info', (req, res) => {
     res.send(`<p>There are ${entries.length} people in the phone book</p><p>${new Date()}</p>`);
