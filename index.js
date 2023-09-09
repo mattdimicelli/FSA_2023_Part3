@@ -28,6 +28,16 @@ app.get('/api/persons', (req, res) => {
     res.json(entries);
 });
 
+app.get('/api/persons/:id', (req, res) => {
+    const id = req.params.id;
+    const match = entries.find(entry => entry.id === Number(id));
+    if (match === undefined) {
+        res.status(404).end();
+    } else {
+        res.json(match);
+    }
+});
+
 app.get('/info', (req, res) => {
     res.send(`<p>There are ${entries.length} people in the phone book</p><p>${new Date()}</p>`);
 });
