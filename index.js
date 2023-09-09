@@ -79,7 +79,7 @@ app.get('/info', (req, res) => {
     res.send(`<p>There are ${entries.length} people in the phone book</p><p>${new Date()}</p>`);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log('server is running');
 })
