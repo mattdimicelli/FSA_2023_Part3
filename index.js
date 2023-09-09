@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+app.use(express.json());
+
 let entries = [
     {
         "id": 1,
@@ -43,7 +45,16 @@ app.delete('/api/persons/:id', (req, res) => {
     entries = entries.filter(entry => entry.id !== Number(id));
     console.log(entries);
     res.status(204).end();
-})
+});
+
+app.post('/api/persons', (req, res) => {
+    const { name, number } = req.body;
+    const id = Math.round(Math.random() * 100000000);
+    const entry = { name, number, id };
+    entries.push(entry);
+    console.log(entries);
+    res.json(entry);
+});
 
 app.get('/info', (req, res) => {
     res.send(`<p>There are ${entries.length} people in the phone book</p><p>${new Date()}</p>`);
