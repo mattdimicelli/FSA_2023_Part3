@@ -1,7 +1,9 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 
 app.use(express.json());
+app.use(morgan('tiny'));
 
 let entries = [
     {
@@ -43,7 +45,6 @@ app.get('/api/persons/:id', (req, res) => {
 app.delete('/api/persons/:id', (req, res) => {
     const id = req.params.id;
     entries = entries.filter(entry => entry.id !== Number(id));
-    console.log(entries);
     res.status(204).end();
 });
 
@@ -58,7 +59,6 @@ app.post('/api/persons', (req, res) => {
         res.status(400).json({ error: 'Name must be unique' });
     } else {
         entries.push(entry);
-        console.log(entries);
         res.json(entry);
     }
 });
