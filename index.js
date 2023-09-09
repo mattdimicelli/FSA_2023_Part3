@@ -51,9 +51,16 @@ app.post('/api/persons', (req, res) => {
     const { name, number } = req.body;
     const id = Math.round(Math.random() * 100000000);
     const entry = { name, number, id };
-    entries.push(entry);
-    console.log(entries);
-    res.json(entry);
+    const nameMatch = entries.find(entry => entry.name === name);
+    if (name == null || number == null || name === '' || number === '') {
+        res.status(400).json({ error: 'Must give name and number' });
+    } else if (nameMatch) {
+        res.status(400).json({ error: 'Name must be unique' });
+    } else {
+        entries.push(entry);
+        console.log(entries);
+        res.json(entry);
+    }
 });
 
 app.get('/info', (req, res) => {
