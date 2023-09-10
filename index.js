@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
 const Entry = require('./models/Entry');
@@ -25,7 +24,6 @@ app.use(morgan((tokens, req, res) => {
 app.get('/api/persons', (req, res) => {
     Entry.find({}).then(entries => {
         res.json(entries);
-        mongoose.connection.close();
     });
 });
 
@@ -46,17 +44,20 @@ app.delete('/api/persons/:id', (req, res) => {
 });
 
 app.post('/api/persons', (req, res) => {
-    const { name, number } = req.body;
-    const id = Math.round(Math.random() * 100000000);
-    const entry = { name, number, id };
-    const nameMatch = entries.find(entry => entry.name === name);
+    const {name, number} = req.body;
+    const entry = {name, number};
+    // const nameMatch = entries.find(entry => entry.name === name);
     if (name == null || number == null || name === '' || number === '') {
-        res.status(400).json({ error: 'Must give name and number' });
-    } else if (nameMatch) {
-        res.status(400).json({ error: 'Name must be unique' });
+        res.status(400).json({error: 'Must give name and number'});
+        // } else if (nameMatch) {
+        //     res.status(400).json({ error: 'Name must be unique' });
+        // }
     } else {
-        entries.push(entry);
-        res.json(entry);
+        const entryDoc = new Entry(entry);
+        entryDoc.save().then(savedEntry => {
+            console.log('entry saved to db');
+            res.json(savedEntry);
+        })
     }
 });
 
