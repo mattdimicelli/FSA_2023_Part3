@@ -39,8 +39,14 @@ app.get('/api/persons/:id', (req, res) => {
 
 app.delete('/api/persons/:id', (req, res) => {
     const id = req.params.id;
-    entries = entries.filter(entry => entry.id !== Number(id));
-    res.status(204).end();
+    Entry.findByIdAndDelete(id).then(() => {
+        res.status(204).end();
+    }).catch(e => {
+        console.error(e);
+        res.status(400).json({ error: 'malformatted id'}).end();
+    })
+    // entries = entries.filter(entry => entry.id !== Number(id));
+    // res.status(204).end();
 });
 
 app.post('/api/persons', (req, res) => {
