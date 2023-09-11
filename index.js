@@ -21,20 +21,21 @@ app.use(morgan((tokens, req, res) => {
 }));
 
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Entry.find({}).then(entries => {
         res.json(entries);
-    });
+    }).catch(e => next(e));
 });
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     const id = req.params.id;
-    const match = entries.find(entry => entry.id === Number(id));
-    if (match === undefined) {
-        res.status(404).end();
-    } else {
-        res.json(match);
-    }
+    Entry.findById(id).then(match => {
+        if(match === null) {
+            res.status(404).end();
+        } else {
+            res.json(match);
+        }
+    }).catch(e => next(e));
 });
 
 app.delete('/api/persons/:id', (req, res, next) => {
@@ -46,22 +47,23 @@ app.delete('/api/persons/:id', (req, res, next) => {
     // res.status(204).end();
 });
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const {name, number} = req.body;
     const entry = {name, number};
-    // const nameMatch = entries.find(entry => entry.name === name);
     if (name == null || number == null || name === '' || number === '') {
-        res.status(400).json({error: 'Must give name and number'});
-        // } else if (nameMatch) {
-        //     res.status(400).json({ error: 'Name must be unique' });
-        // }
-    } else {
-        const entryDoc = new Entry(entry);
-        entryDoc.save().then(savedEntry => {
-            console.log('entry saved to db');
-            res.json(savedEntry);
-        })
+        return res.status(400).json({error: 'Must give name and number'});
     }
+    Entry.find({ name: name }).then(nameMatches => {
+        if(nameMatches.length > 0) {
+            res.status(400).json({ error: 'Name must be unique' });
+        } else {
+            const entryDoc = new Entry(entry);
+            entryDoc.save().then(savedEntry => {
+                console.log('entry saved to db');
+                res.json(savedEntry);
+            }).catch(e => next(e));
+        }
+    }).catch(e => next(e));
 });
 
 app.put('/api/persons/:id', (req, res, next) => {
@@ -72,8 +74,10 @@ app.put('/api/persons/:id', (req, res, next) => {
         .catch(e => next(e));
 });
 
-app.get('/info', (req, res) => {
-    res.send(`<p>There are ${entries.length} people in the phone book</p><p>${new Date()}</p>`);
+app.get('/info', (req, res, next) => {
+    Entry.find({}).then(response => {
+        res.send(`<p>There are ${response.length} people in the phone book</p><p>${new Date()}</p>`);
+    }).catch(e => next(e));
 });
 
 app.use((error, req, res, next) => {
@@ -81,6 +85,7 @@ app.use((error, req, res, next) => {
         console.error(error);
         res.status(400).json({ error: 'malformatted id'}).end();
     }
+    console.error(error);
     next();
 })
 
