@@ -64,6 +64,14 @@ app.post('/api/persons', (req, res) => {
     }
 });
 
+app.put('/api/persons/:id', (req, res, next) => {
+    const entry = req.body;
+    const id = req.params.id;
+    Entry.findByIdAndUpdate(id, entry, { new: true })
+        .then(updatedEntry => res.json(updatedEntry))
+        .catch(e => next(e));
+});
+
 app.get('/info', (req, res) => {
     res.send(`<p>There are ${entries.length} people in the phone book</p><p>${new Date()}</p>`);
 });
