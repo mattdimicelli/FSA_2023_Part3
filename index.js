@@ -43,8 +43,6 @@ app.delete('/api/persons/:id', (req, res, next) => {
     Entry.findByIdAndDelete(id).then(() => {
         res.status(204).end();
     }).catch(e => next(e));
-    // entries = entries.filter(entry => entry.id !== Number(id));
-    // res.status(204).end();
 });
 
 app.post('/api/persons', (req, res, next) => {
@@ -69,7 +67,7 @@ app.post('/api/persons', (req, res, next) => {
 app.put('/api/persons/:id', (req, res, next) => {
     const entry = req.body;
     const id = req.params.id;
-    Entry.findByIdAndUpdate(id, entry, { new: true })
+    Entry.findByIdAndUpdate(id, entry, { new: true, runValidators: true })
         .then(updatedEntry => res.json(updatedEntry))
         .catch(e => next(e));
 });
@@ -83,7 +81,9 @@ app.get('/info', (req, res, next) => {
 app.use((error, req, res, next) => {
     if (error.name === 'CastError') {
         console.error(error);
-        res.status(400).json({ error: 'malformatted id'}).end();
+        return res.status(400).json({ error: 'malformatted id'}).end();
+    } else if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message });
     }
     console.error(error);
     next();
